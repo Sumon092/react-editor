@@ -20,6 +20,67 @@ const LinkInsertion = ({ modalPosition, setDisplayLinkModal, savedSelection, con
         };
     }, [setDisplayLinkModal]);
 
+    useEffect(() => {
+        const handleContextMenu = (event) => {
+            event.preventDefault(); // Prevent default context menu
+            const selection = window.getSelection();
+            const selectedText = selection.toString();
+            const parentNode = selection.anchorNode.parentNode;
+
+            if (parentNode.tagName === 'A') {
+                const menu = [
+                    {
+                        label: 'Remove Link',
+                        action: () => handleRemoveLink(),
+                    },
+                ];
+                showContextMenu(event.clientX, event.clientY, menu);
+            } else {
+                const menu = [
+                    {
+                        label: 'Add Link',
+                        action: () => handleAddLinkFromContextMenu(selectedText),
+                    },
+                ];
+                showContextMenu(event.clientX, event.clientY, menu);
+            }
+        };
+
+        document.addEventListener("contextmenu", handleContextMenu);
+        return () => {
+            document.removeEventListener("contextmenu", handleContextMenu);
+        };
+    }, []);
+
+    const showContextMenu = (x, y, menu) => {
+        const menuContainer = document.createElement('div');
+        menuContainer.style.position = 'absolute';
+        menuContainer.style.left = `${x}px`;
+        menuContainer.style.top = `${y}px`;
+        menuContainer.style.backgroundColor = '#fff';
+        menuContainer.style.border = '1px solid #ccc';
+        menuContainer.style.padding = '5px';
+        menuContainer.style.zIndex = '9999';
+
+        menu.forEach(item => {
+            const menuItem = document.createElement('div');
+            menuItem.textContent = item.label;
+            menuItem.style.cursor = 'pointer';
+            menuItem.style.padding = '3px';
+            menuItem.addEventListener('click', () => {
+                item.action();
+                document.body.removeChild(menuContainer);
+            });
+            menuContainer.appendChild(menuItem);
+        });
+
+        document.body.appendChild(menuContainer);
+
+        document.addEventListener('click', () => {
+            document.body.removeChild(menuContainer);
+        }, { once: true });
+    };
+
     const handleLinkUrlChange = (e) => {
         setLinkURL(e.target.value);
     };
@@ -55,6 +116,52 @@ const LinkInsertion = ({ modalPosition, setDisplayLinkModal, savedSelection, con
         contentEditableRef.current.focus();
     };
 
+    const handleAddLinkFromEditorText = () => {
+        const selection = window.getSelection();
+        const selectedText = selection.toString();
+
+        if (!selection.isCollapsed) {
+            // Check if the selected text is already a link
+            const parentNode = selection.anchorNode.parentNode;
+            if (parentNode.tagName === 'A') {
+                setLinkURL(parentNode.href);
+                setLinkText(selectedText);
+            } else {
+                setLinkText(selectedText);
+            }
+        } else {
+            alert('Please select some text in the editor to add a link.');
+        }
+    };
+
+    const handleRemoveLink = () => {
+        const selection = window.getSelection();
+        // const selectedText = selection.toString();
+
+        if (!selection.isCollapsed) {
+            // Check if the selected text is a link
+            const parentNode = selection.anchorNode.parentNode;
+            if (parentNode.tagName === 'A') {
+                restoreSelection();
+                const linkNode = parentNode;
+                const textNode = document.createTextNode(linkNode.textContent);
+                linkNode.parentNode.replaceChild(textNode, linkNode);
+                setDisplayLinkModal(false);
+                contentEditableRef.current.focus();
+            } else {
+                alert('The selected text is not a link.');
+            }
+        } else {
+            alert('Please select a linked text in the editor to remove the link.');
+        }
+    };
+
+    const handleAddLinkFromContextMenu = (selectedText) => {
+        setLinkText(selectedText);
+        setLinkURL('');
+        setDisplayLinkModal(true);
+    };
+
     return (
         <div
             ref={linkRef}
@@ -79,7 +186,11 @@ const LinkInsertion = ({ modalPosition, setDisplayLinkModal, savedSelection, con
                     className="w-full px-4 py-2 border border-blue-500 rounded focus:outline-blue-800"
                 />
             </div>
-            <button className="px-2 py-1 text-blue-500 rounded-md text-right w-full" onClick={handleInsertLink}>Insert Link</button>
+            <div className="flex justify-between">
+                <button className="px-2 py-1 text-blue-500 rounded-md" onClick={handleInsertLink}>Insert</button>
+                <button className="px-2 py-1 text-red-500 rounded-md" onClick={handleRemoveLink}>Remove</button>
+                <button className="px-2 py-1 text-green-500 rounded-md" onClick={handleAddLinkFromEditorText}>From Text</button>
+            </div>
         </div>
     );
 };
