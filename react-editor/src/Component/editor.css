@@ -1,0 +1,25 @@
+.editor-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.toolbar button {
+  padding: 5px 10px;
+  border: none;
+  cursor: pointer;
+  background-color: #f0f0f0;
+  border-radius: 3px;
+}
+
+.output {
+  border: 1px solid #ccc;
+  padding: 10px;
+  min-height: 200px;
+  outline: none;
+}
