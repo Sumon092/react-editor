@@ -3,6 +3,7 @@ import Quill from "quill";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import "./editor.css";
+import DOMPurify from 'dompurify';
 
 const Editor = () => {
     const [value, setValue] = useState("");
