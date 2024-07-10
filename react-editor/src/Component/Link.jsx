@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { IoLinkOutline } from 'react-icons/io5';
 
-const LinkInsertion = ({ modalPosition, error, setDisplayLinkModal, applyStyle, modalRef }) => {
+const LinkInsertion = ({ modalPosition, error, setDisplayLinkModal, applyStyle, savedSelection }) => {
     const [linkText, setLinkText] = useState('');
     const [linkURL, setLinkURL] = useState('');
+    const linkRef = useRef(null)
 
 
     const handleLinkUrlChange = (e) => {
@@ -14,18 +15,30 @@ const LinkInsertion = ({ modalPosition, error, setDisplayLinkModal, applyStyle, 
         setLinkText(e.target.value);
     };
 
-    const handleInsertLink = () => {
-        if (linkRef.current && linkURL) {
-            applyStyle("createLink", linkURL);
-            setLinkURL('');
-            setLinkText('');
-            setDisplayLinkModal(false);
+    const restoreSelection = () => {
+        if (savedSelection.current) {
+            if (window.getSelection) {
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(savedSelection.current);
+            } else if (document.selection && savedSelection.current.select) {
+                savedSelection.current.select();
+            }
         }
+    };
+
+    const handleInsertLink = () => {
+        restoreSelection()
+        applyStyle("createLink", linkURL);
+        setLinkURL('');
+        setLinkText('');
+        setDisplayLinkModal(false);
+
     };
 
     return (
         <div
-            ref={modalRef}
+            ref={linkRef}
             style={{ position: 'absolute', zIndex: 2, top: modalPosition.top, left: modalPosition.left, backgroundColor: '#fff', padding: '10px', boxShadow: '0 0 10px rgba(0,0,0,0.1)', marginTop: '10px', maxWidth: '300px' }}
         >
             <div className="mb-2 h-8 text-2xl bg-slate-300 rounded-md">

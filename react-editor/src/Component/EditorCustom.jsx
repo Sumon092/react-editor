@@ -123,7 +123,7 @@ const EditorCustom = () => {
             )}
 
             {displayLinkModal && (
-                <LinkInsertion modalPosition={modalPosition} error={error} setDisplayLinkModal={setDisplayLinkModal} applyStyle={applyStyle} modalRef={modalRef} />
+                <LinkInsertion modalPosition={modalPosition} error={error} setDisplayLinkModal={setDisplayLinkModal} applyStyle={applyStyle} modalRef={modalRef} savedSelection={saveSelection} />
             )}
 
             <div
