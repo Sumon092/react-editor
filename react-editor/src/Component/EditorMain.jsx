@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { SketchPicker } from 'react-color';
 import DOMPurify from 'dompurify';
-import LinkInsertion from "./Link";
 import ImageURL from "./ImageURL";
+import LinkInsertion from "./LinkInsertion";
 
-const EditorCustom = () => {
+const EditorMain = () => {
     const [htmlContent, setHtmlContent] = useState("");
     const [displayColorPicker, setDisplayColorPicker] = useState(false);
     const [currentColor, setCurrentColor] = useState("#000000");
@@ -16,20 +16,7 @@ const EditorCustom = () => {
     const contentEditableRef = useRef(null);
     const imageButtonRef = useRef(null);
     const linkButtonRef = useRef(null);
-    const modalRef = useRef(null);
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (modalRef.current && !modalRef.current.contains(event.target) && !imageButtonRef.current.contains(event.target)) {
-                setDisplayImageModal(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
 
     const applyStyle = (command, value = null) => {
         document.execCommand(command, false, value);
@@ -53,6 +40,7 @@ const EditorCustom = () => {
         }
     };
 
+    // Image URL insertion
     const openImageModal = (e) => {
         saveSelection();
         const buttonRect = e.target.getBoundingClientRect();
@@ -63,6 +51,7 @@ const EditorCustom = () => {
         setDisplayImageModal(true);
     };
 
+    // Link text insertion
     const openLinkModal = (e) => {
         saveSelection();
         const buttonRect = e.target.getBoundingClientRect();
@@ -114,7 +103,7 @@ const EditorCustom = () => {
                     contentEditableRef={contentEditableRef}
                     applyStyle={applyStyle}
                     savedSelection={savedSelection}
-                    modalRef={modalRef}
+                    error={error}
                     setError={setError}
                 />
             )}
@@ -122,20 +111,21 @@ const EditorCustom = () => {
             {displayLinkModal && (
                 <LinkInsertion
                     modalPosition={modalPosition}
-                    error={error}
                     setDisplayLinkModal={setDisplayLinkModal}
                     applyStyle={applyStyle}
-                    modalRef={modalRef}
                     savedSelection={savedSelection}
+                    contentEditableRef={contentEditableRef}
+                    error={error}
+                    setError={setError}
                 />
             )}
 
             <div
                 ref={contentEditableRef}
-                className="output max-w-[800px]"
+                className="output max-w-full min-w-xl"
                 contentEditable
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlContent) }}
-                style={{ minHeight: '200px', border: '1px solid #ccc', padding: '10px' }}
+                style={{ minHeight: '500px', border: '1px solid #ccc', padding: '10px' }}
                 onMouseUp={saveSelection}
                 onKeyUp={saveSelection}
             />
@@ -143,4 +133,4 @@ const EditorCustom = () => {
     );
 };
 
-export default EditorCustom;
+export default EditorMain;

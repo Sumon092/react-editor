@@ -1,18 +1,16 @@
-import { useState } from 'react'
+
 import './App.css'
-import EditorCustom from './Component/EditorCustom'
-import Editor from './Component/Editor'
+import EditorMain from './Component/EditorMain'
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
-    <>
+    <div className='h-screen w-full flex justify-center flex-col'>
       <h3 className='text-5xl'>Editor</h3>
 
       {/* <Editor /> */}
-      <EditorCustom />
-    </>
+      <EditorMain />
+    </div>
   )
 }
 
