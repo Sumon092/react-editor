@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { SketchPicker } from 'react-color';
 import DOMPurify from 'dompurify';
 import LinkInsertion from "./Link";
@@ -9,22 +9,20 @@ const EditorCustom = () => {
     const [displayColorPicker, setDisplayColorPicker] = useState(false);
     const [currentColor, setCurrentColor] = useState("#000000");
     const [displayImageModal, setDisplayImageModal] = useState(false);
-    const [error, setError] = useState(false)
+    const [error, setError] = useState(false);
     const savedSelection = useRef(null);
     const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
     const [displayLinkModal, setDisplayLinkModal] = useState(false);
     const contentEditableRef = useRef(null);
     const imageButtonRef = useRef(null);
-    const linkButtonRef = useRef(null)
-
+    const linkButtonRef = useRef(null);
     const modalRef = useRef(null);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (modalRef.current && !modalRef.current.contains(event.target) && !imageButtonRef.current.contains(event.target)) {
-                setDisplayImageModal(false)
+                setDisplayImageModal(false);
             }
-
         };
 
         document.addEventListener("mousedown", handleClickOutside);
@@ -49,18 +47,12 @@ const EditorCustom = () => {
     };
 
     const saveSelection = () => {
-        if (window.getSelection) {
-            const sel = window.getSelection();
-            if (sel.getRangeAt && sel.rangeCount) {
-                savedSelection.current = sel.getRangeAt(0);
-            }
-        } else if (document.selection && document.selection.createRange) {
-            savedSelection.current = document.selection.createRange();
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) {
+            savedSelection.current = sel.getRangeAt(0);
         }
     };
 
-
-    // insert image url
     const openImageModal = (e) => {
         saveSelection();
         const buttonRect = e.target.getBoundingClientRect();
@@ -71,7 +63,6 @@ const EditorCustom = () => {
         setDisplayImageModal(true);
     };
 
-    // add link to editor
     const openLinkModal = (e) => {
         saveSelection();
         const buttonRect = e.target.getBoundingClientRect();
@@ -81,8 +72,6 @@ const EditorCustom = () => {
         });
         setDisplayLinkModal(true);
     };
-
-
 
     return (
         <div className="editor-wrapper">
@@ -119,11 +108,26 @@ const EditorCustom = () => {
             )}
 
             {displayImageModal && (
-                <ImageURL setDisplayImageModal={setDisplayImageModal} modalPosition={modalPosition} contentEditableRef={contentEditableRef} applyStyle={applyStyle} savedSelection={saveSelection} modalRef={modalRef} />
+                <ImageURL
+                    setDisplayImageModal={setDisplayImageModal}
+                    modalPosition={modalPosition}
+                    contentEditableRef={contentEditableRef}
+                    applyStyle={applyStyle}
+                    savedSelection={savedSelection}
+                    modalRef={modalRef}
+                    setError={setError}
+                />
             )}
 
             {displayLinkModal && (
-                <LinkInsertion modalPosition={modalPosition} error={error} setDisplayLinkModal={setDisplayLinkModal} applyStyle={applyStyle} modalRef={modalRef} savedSelection={saveSelection} />
+                <LinkInsertion
+                    modalPosition={modalPosition}
+                    error={error}
+                    setDisplayLinkModal={setDisplayLinkModal}
+                    applyStyle={applyStyle}
+                    modalRef={modalRef}
+                    savedSelection={savedSelection}
+                />
             )}
 
             <div
@@ -132,10 +136,11 @@ const EditorCustom = () => {
                 contentEditable
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlContent) }}
                 style={{ minHeight: '200px', border: '1px solid #ccc', padding: '10px' }}
+                onMouseUp={saveSelection}
+                onKeyUp={saveSelection}
             />
         </div>
     );
 };
 
 export default EditorCustom;
-

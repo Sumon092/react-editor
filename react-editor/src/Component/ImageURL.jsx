@@ -1,41 +1,36 @@
-import React, { useRef, useState } from 'react';
+/* eslint-disable react/prop-types */
+import { useState } from 'react';
 import { IoLink } from 'react-icons/io5';
 
-const ImageURL = ({ setDisplayImageModal, contentEditableRef, applyStyle, savedSelection, imageUrlInputRef }) => {
+const ImageURL = ({ setDisplayImageModal, applyStyle, savedSelection, imageUrlInputRef, modalPosition, modalRef, setError }) => {
     const [imageUrl, setImageUrl] = useState("");
 
     const handleImageUrlChange = (e) => {
         setImageUrl(e.target.value);
-        e.target.blur();
-        contentEditableRef.current.focus();
     };
 
     const restoreSelection = () => {
         if (savedSelection.current) {
-            if (window.getSelection) {
-                const sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(savedSelection.current);
-            } else if (document.selection && savedSelection.current.select) {
-                savedSelection.current.select();
-            }
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(savedSelection.current);
         }
     };
+
     const insertImage = () => {
         if (!imageUrl) {
-            setError('Please enter an url')
-            return
+            setError('Please enter an URL');
+            return;
         }
-        if (imageUrl) {
-            restoreSelection();
-            applyStyle("insertImage", imageUrl);
-        }
+        restoreSelection();
+        applyStyle("insertImage", imageUrl);
 
         setDisplayImageModal(false);
         setImageUrl("");
     };
+
     return (
-        <div style={{ position: 'fixed', zIndex: 2, top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: '#fff', padding: '10px', boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}>
+        <div ref={modalRef} style={{ position: 'fixed', zIndex: 2, top: modalPosition.top, left: modalPosition.left, backgroundColor: '#fff', padding: '10px', boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}>
             <div className="mb-2 h-8 text-2xl bg-slate-300 rounded-md">
                 <IoLink className="bg-white h-full text-slate-500 border border-slate-300 rounded-md w-16 flex items-center py-[4px]" />
             </div>
