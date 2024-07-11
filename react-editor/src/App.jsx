@@ -10,7 +10,7 @@ function App() {
 
       {/* <Editor /> */}
       <EditorMain />
-      Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quisquam, officiis!
+      
     </div>
   )
 }
