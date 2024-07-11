@@ -1,10 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { SketchPicker } from 'react-color';
-import DOMPurify from 'dompurify';
 import ImageURL from "./ImageURL";
 import LinkInsertion from "./LinkInsertion";
 import { MdOutlineFormatIndentDecrease, MdOutlineFormatIndentIncrease } from "react-icons/md";
-import { IoLinkOutline } from 'react-icons/io5'
+import { IoLinkOutline } from 'react-icons/io5';
 import { RiBold, RiFontColor, RiImageFill, RiItalic, RiUnderline } from "react-icons/ri";
 
 const EditorMain = () => {
@@ -19,7 +18,6 @@ const EditorMain = () => {
     const contentEditableRef = useRef(null);
     const imageButtonRef = useRef(null);
     const linkButtonRef = useRef(null);
-
 
     const applyStyle = (command, value = null) => {
         document.execCommand(command, false, value);
@@ -43,7 +41,7 @@ const EditorMain = () => {
         }
     };
 
-    // Image URL insertion
+
     const openImageModal = (e) => {
         saveSelection();
         const buttonRect = e.target.getBoundingClientRect();
@@ -54,7 +52,6 @@ const EditorMain = () => {
         setDisplayImageModal(true);
     };
 
-    // Link text insertion
     const openLinkModal = (e) => {
         saveSelection();
         const buttonRect = e.target.getBoundingClientRect();
@@ -65,8 +62,16 @@ const EditorMain = () => {
         setDisplayLinkModal(true);
     };
 
+    const applyIndent = () => {
+        applyStyle("indent");
+    };
+
+    const applyOutdent = () => {
+        applyStyle("outdent");
+    };
+
     return (
-        <div className="editor-wrapper">
+        <div className="editor-wrapper text-start px-8">
             <div className="flex gap-4 mb-2 items-center h-10 bg-slate-100 px-2 rounded-sm">
                 <button onClick={() => applyStyle("bold")}><RiBold className="text-slate-500 text-2xl font-thin" /></button>
                 <button onClick={() => applyStyle("italic")}><RiItalic className="text-slate-500 text-2xl font-thin" /></button>
@@ -86,8 +91,8 @@ const EditorMain = () => {
                 >
                     <IoLinkOutline className="text-slate-500 text-3xl" />
                 </button>
-                <button><MdOutlineFormatIndentDecrease className="text-2xl text-slate-600" /></button>
-                <button><MdOutlineFormatIndentIncrease className="text-2xl text-slate-600" /></button>
+                <button onClick={applyOutdent}><MdOutlineFormatIndentDecrease className="text-2xl text-slate-600" /></button>
+                <button onClick={applyIndent}><MdOutlineFormatIndentIncrease className="text-2xl text-slate-600" /></button>
             </div>
             {displayColorPicker && (
                 <div style={{ position: 'absolute', zIndex: 2 }}>
@@ -125,9 +130,9 @@ const EditorMain = () => {
 
             <div
                 ref={contentEditableRef}
-                className="output max-w-full min-w-xl"
+                className="output max-w-full min-w-xl !px-4 focus:outline-none rounded-md border-2 border-slate-400"
                 contentEditable
-                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlContent) }}
+                dangerouslySetInnerHTML={{ __html: htmlContent }}
                 style={{ minHeight: '500px', border: '1px solid #ccc', padding: '10px' }}
                 onMouseUp={saveSelection}
                 onKeyUp={saveSelection}
