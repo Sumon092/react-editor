@@ -10,7 +10,6 @@ function App() {
 
       {/* <Editor /> */}
       <EditorMain />
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos, molestiae corporis. Et voluptate nulla ut quibusdam totam! Quasi aut corporis, dignissimos doloremque excepturi velit mollitia exercitationem aspernatur. Tenetur, quos quisquam.
     </div>
   )
 }
