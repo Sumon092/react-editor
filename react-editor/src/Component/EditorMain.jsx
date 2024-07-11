@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { SketchPicker } from 'react-color';
 import ImageURL from "./ImageURL";
 import LinkInsertion from "./LinkInsertion";
-import { MdOutlineFormatIndentDecrease, MdOutlineFormatIndentIncrease } from "react-icons/md";
+import { MdOutlineFormatIndentDecrease, MdOutlineFormatIndentIncrease, MdOutlineFormatListBulleted, MdOutlineFormatListNumbered } from "react-icons/md";
 import { IoLinkOutline } from 'react-icons/io5';
 import { RiBold, RiFontColor, RiImageFill, RiItalic, RiUnderline } from "react-icons/ri";
 
@@ -19,10 +19,28 @@ const EditorMain = () => {
     const imageButtonRef = useRef(null);
     const linkButtonRef = useRef(null);
 
+
+    const saveSelection = () => {
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) {
+            savedSelection.current = sel.getRangeAt(0);
+        }
+    };
+
+    const restoreSelection = () => {
+        const sel = window.getSelection();
+        if (savedSelection.current) {
+            sel.removeAllRanges();
+            sel.addRange(savedSelection.current);
+        }
+    };
+
     const applyStyle = (command, value = null) => {
+        restoreSelection();
         document.execCommand(command, false, value);
         contentEditableRef.current.focus();
         setHtmlContent(contentEditableRef.current.innerHTML);
+        // saveSelection()
     };
 
     const handleColorChange = (color) => {
@@ -30,15 +48,10 @@ const EditorMain = () => {
         applyStyle("foreColor", color.hex);
     };
 
-    const toggleColorPicker = () => {
-        setDisplayColorPicker(!displayColorPicker);
-    };
 
-    const saveSelection = () => {
-        const sel = window.getSelection();
-        if (sel.rangeCount > 0) {
-            savedSelection.current = sel.getRangeAt(0);
-        }
+    const toggleColorPicker = () => {
+        saveSelection()
+        setDisplayColorPicker(!displayColorPicker);
     };
 
 
@@ -70,6 +83,14 @@ const EditorMain = () => {
         applyStyle("outdent");
     };
 
+    const applyUnorderedList = () => {
+        applyStyle("insertUnorderedList");
+    };
+
+    const applyOrderedList = () => {
+        applyStyle("insertOrderedList");
+    };
+
     return (
         <div className="editor-wrapper text-start px-8">
             <div className="flex gap-4 mb-2 items-center h-10 bg-slate-100 px-2 rounded-sm">
@@ -77,7 +98,7 @@ const EditorMain = () => {
                 <button onClick={() => applyStyle("italic")}><RiItalic className="text-slate-500 text-2xl font-thin" /></button>
                 <button onClick={() => applyStyle("underline")}><RiUnderline className="text-slate-500 text-2xl font-thin" /></button>
                 <button onClick={toggleColorPicker}>
-                    <span style={{ color: currentColor }}><RiFontColor className="text-2xl text-slate-500" /></span>
+                    <span ><RiFontColor className="text-2xl text-slate-500" style={{ color: currentColor }} /></span>
                 </button>
                 <button
                     ref={imageButtonRef}
@@ -93,6 +114,8 @@ const EditorMain = () => {
                 </button>
                 <button onClick={applyOutdent}><MdOutlineFormatIndentDecrease className="text-2xl text-slate-600" /></button>
                 <button onClick={applyIndent}><MdOutlineFormatIndentIncrease className="text-2xl text-slate-600" /></button>
+                <button onClick={applyOrderedList}><MdOutlineFormatListNumbered className="text-3xl text-slate-500" /></button>
+                <button onClick={applyUnorderedList}><MdOutlineFormatListBulleted className="text-3xl text-slate-500" /></button>
             </div>
             {displayColorPicker && (
                 <div style={{ position: 'absolute', zIndex: 2 }}>
