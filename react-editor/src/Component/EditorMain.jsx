@@ -1,15 +1,15 @@
 import { useState, useRef } from "react";
-import { SketchPicker } from 'react-color';
 import ImageURL from "./ImageURL";
 import LinkInsertion from "./LinkInsertion";
 import { MdOutlineFormatIndentDecrease, MdOutlineFormatIndentIncrease, MdOutlineFormatListBulleted, MdOutlineFormatListNumbered } from "react-icons/md";
 import { IoLinkOutline } from 'react-icons/io5';
 import { RiBold, RiFontColor, RiImageFill, RiItalic, RiUnderline } from "react-icons/ri";
+import ColorPicker from "./ColorPicker";
 
 const EditorMain = () => {
     const [htmlContent, setHtmlContent] = useState("");
     const [displayColorPicker, setDisplayColorPicker] = useState(false);
-    const [currentColor, setCurrentColor] = useState("#000000");
+    const [currentColor, setCurrentColor] = useState("");
     const [displayImageModal, setDisplayImageModal] = useState(false);
     const [error, setError] = useState(false);
     const savedSelection = useRef(null);
@@ -19,11 +19,11 @@ const EditorMain = () => {
     const imageButtonRef = useRef(null);
     const linkButtonRef = useRef(null);
 
-
     const saveSelection = () => {
         const sel = window.getSelection();
         if (sel.rangeCount > 0) {
-            savedSelection.current = sel.getRangeAt(0);
+            const range = sel.getRangeAt(0);
+            savedSelection.current = range.cloneRange();
         }
     };
 
@@ -40,20 +40,13 @@ const EditorMain = () => {
         document.execCommand(command, false, value);
         contentEditableRef.current.focus();
         setHtmlContent(contentEditableRef.current.innerHTML);
-        // saveSelection()
-    };
-
-    const handleColorChange = (color) => {
-        setCurrentColor(color.hex);
-        applyStyle("foreColor", color.hex);
     };
 
 
     const toggleColorPicker = () => {
-        saveSelection()
+        saveSelection();
         setDisplayColorPicker(!displayColorPicker);
     };
-
 
     const openImageModal = (e) => {
         saveSelection();
@@ -75,6 +68,7 @@ const EditorMain = () => {
         setDisplayLinkModal(true);
     };
 
+
     const applyIndent = () => {
         applyStyle("indent");
     };
@@ -83,13 +77,51 @@ const EditorMain = () => {
         applyStyle("outdent");
     };
 
-    const applyUnorderedList = () => {
-        applyStyle("insertUnorderedList");
+    const applyOrderedList = () => {
+        restoreSelection();
+        document.execCommand('insertOrderedList');
+        setHtmlContent(contentEditableRef.current.innerHTML);
     };
 
-    const applyOrderedList = () => {
-        applyStyle("insertOrderedList");
+    const applyUnorderedList = () => {
+        restoreSelection();
+        document.execCommand('insertUnorderedList');
+        setHtmlContent(contentEditableRef.current.innerHTML);
     };
+
+    const insertList = (type) => {
+        restoreSelection();
+
+        const sel = window.getSelection();
+        const range = sel.getRangeAt(0);
+
+        const list = document.createElement(type);
+        list.style.paddingLeft = '40px'; // Adjust indentation as needed
+
+        const selectedText = range.toString().trim(); // Get selected text
+
+        // Create list items based on type
+        if (type === 'ul') {
+            list.style.listStyleType = 'disc'; // Use disc for unordered list
+        } else if (type === 'ol') {
+            list.style.listStyleType = 'decimal'; // Use decimal for ordered list
+        }
+
+        const li = document.createElement('li');
+        li.textContent = selectedText !== '' ? selectedText : 'List item'; // Default if no selection
+
+        list.appendChild(li);
+
+        range.deleteContents();
+        range.insertNode(list);
+
+        contentEditableRef.current.focus();
+        setHtmlContent(contentEditableRef.current.innerHTML);
+    };
+
+
+
+
 
     return (
         <div className="editor-wrapper text-start px-8">
@@ -98,7 +130,7 @@ const EditorMain = () => {
                 <button onClick={() => applyStyle("italic")}><RiItalic className="text-slate-500 text-2xl font-thin" /></button>
                 <button onClick={() => applyStyle("underline")}><RiUnderline className="text-slate-500 text-2xl font-thin" /></button>
                 <button onClick={toggleColorPicker}>
-                    <span ><RiFontColor className="text-2xl text-slate-500" style={{ color: currentColor }} /></span>
+                    <span><RiFontColor className="text-2xl text-slate-500" style={{ color: currentColor }} /></span>
                 </button>
                 <button
                     ref={imageButtonRef}
@@ -114,17 +146,17 @@ const EditorMain = () => {
                 </button>
                 <button onClick={applyOutdent}><MdOutlineFormatIndentDecrease className="text-2xl text-slate-600" /></button>
                 <button onClick={applyIndent}><MdOutlineFormatIndentIncrease className="text-2xl text-slate-600" /></button>
-                <button onClick={applyOrderedList}><MdOutlineFormatListNumbered className="text-3xl text-slate-500" /></button>
-                <button onClick={applyUnorderedList}><MdOutlineFormatListBulleted className="text-3xl text-slate-500" /></button>
+                <button onClick={() => insertList('ol')}><MdOutlineFormatListNumbered className="text-3xl text-slate-500" /></button>
+                <button onClick={() => insertList('ul')}><MdOutlineFormatListBulleted className="text-3xl text-slate-500" /></button>
             </div>
+
             {displayColorPicker && (
-                <div style={{ position: 'absolute', zIndex: 2 }}>
-                    <div
-                        style={{ position: 'fixed', top: '0px', right: '0px', bottom: '0px', left: '0px' }}
-                        onClick={toggleColorPicker}
-                    />
-                    <SketchPicker color={currentColor} onChange={handleColorChange} />
-                </div>
+                <ColorPicker
+                    currentColor={currentColor}
+                    setCurrentColor={setCurrentColor}
+                    toggleColorPicker={toggleColorPicker}
+                    applyStyle={applyStyle}
+                />
             )}
 
             {displayImageModal && (
@@ -153,10 +185,10 @@ const EditorMain = () => {
 
             <div
                 ref={contentEditableRef}
-                className="output max-w-full min-w-xl !px-4 focus:outline-none rounded-md border-2 border-slate-400"
+                className="output max-w-full min-w-xl !px-4 focus:outline-none rounded-md border-2 border-slate-400 text-slate-600"
                 contentEditable
                 dangerouslySetInnerHTML={{ __html: htmlContent }}
-                style={{ minHeight: '500px', border: '1px solid #ccc', padding: '10px' }}
+                style={{ minHeight: '700px', border: '1px solid #ccc', padding: '10px' }}
                 onMouseUp={saveSelection}
                 onKeyUp={saveSelection}
             />
