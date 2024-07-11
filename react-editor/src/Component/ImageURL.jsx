@@ -44,7 +44,7 @@ const ImageURL = ({ setDisplayImageModal, applyStyle, savedSelection, imageUrlIn
     };
 
     return (
-        <div className='mt-[-10px]' ref={imageRef} style={{ position: 'fixed', zIndex: 2, top: modalPosition.top, left: modalPosition.left, backgroundColor: '#fff', padding: '10px', boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}>
+        <div ref={imageRef} style={{ position: 'fixed', zIndex: 2, top: modalPosition.top, left: modalPosition.left, backgroundColor: '#fff', padding: '10px', boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}>
             <div className=" h-8 text-2xl bg-slate-300 rounded-md">
                 <IoLink className="bg-white h-full text-slate-500 border border-slate-300 rounded-md w-16 flex items-center" />
             </div>

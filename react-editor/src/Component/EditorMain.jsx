@@ -3,6 +3,9 @@ import { SketchPicker } from 'react-color';
 import DOMPurify from 'dompurify';
 import ImageURL from "./ImageURL";
 import LinkInsertion from "./LinkInsertion";
+import { MdOutlineFormatIndentDecrease, MdOutlineFormatIndentIncrease } from "react-icons/md";
+import { IoLinkOutline } from 'react-icons/io5'
+import { RiBold, RiFontColor, RiImageFill, RiItalic, RiUnderline } from "react-icons/ri";
 
 const EditorMain = () => {
     const [htmlContent, setHtmlContent] = useState("");
@@ -64,27 +67,27 @@ const EditorMain = () => {
 
     return (
         <div className="editor-wrapper">
-            <div className="toolbar flex gap-4 mb-2">
-                <button className="bg-slate-300 px-2 py-1 rounded-md" onClick={() => applyStyle("bold")}><b>B</b></button>
-                <button className="bg-slate-300 px-2 py-1 rounded-md" onClick={() => applyStyle("italic")}><i>I</i></button>
-                <button className="bg-slate-300 px-2 py-1 rounded-md" onClick={() => applyStyle("underline")}><u>U</u></button>
-                <button className="bg-slate-300 px-2 py-1 rounded-md" onClick={toggleColorPicker}>
-                    <span style={{ color: currentColor }}>A</span>
+            <div className="flex gap-4 mb-2 items-center h-10 bg-slate-100 px-2 rounded-sm">
+                <button onClick={() => applyStyle("bold")}><RiBold className="text-slate-500 text-2xl font-thin" /></button>
+                <button onClick={() => applyStyle("italic")}><RiItalic className="text-slate-500 text-2xl font-thin" /></button>
+                <button onClick={() => applyStyle("underline")}><RiUnderline className="text-slate-500 text-2xl font-thin" /></button>
+                <button onClick={toggleColorPicker}>
+                    <span style={{ color: currentColor }}><RiFontColor className="text-2xl text-slate-500" /></span>
                 </button>
                 <button
                     ref={imageButtonRef}
-                    className="bg-slate-300 px-2 py-1 rounded-md"
                     onClick={openImageModal}
                 >
-                    Image
+                    <RiImageFill className="text-slate-500 text-2xl" />
                 </button>
                 <button
                     ref={linkButtonRef}
-                    className="bg-slate-300 px-2 py-1 rounded-md"
                     onClick={openLinkModal}
                 >
-                    Link
+                    <IoLinkOutline className="text-slate-500 text-3xl" />
                 </button>
+                <button><MdOutlineFormatIndentDecrease className="text-2xl text-slate-600" /></button>
+                <button><MdOutlineFormatIndentIncrease className="text-2xl text-slate-600" /></button>
             </div>
             {displayColorPicker && (
                 <div style={{ position: 'absolute', zIndex: 2 }}>
