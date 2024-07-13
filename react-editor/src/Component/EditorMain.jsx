@@ -77,17 +77,6 @@ const EditorMain = () => {
         applyStyle("outdent");
     };
 
-    const applyOrderedList = () => {
-        restoreSelection();
-        document.execCommand('insertOrderedList');
-        setHtmlContent(contentEditableRef.current.innerHTML);
-    };
-
-    const applyUnorderedList = () => {
-        restoreSelection();
-        document.execCommand('insertUnorderedList');
-        setHtmlContent(contentEditableRef.current.innerHTML);
-    };
 
     const insertList = (type) => {
         restoreSelection();
