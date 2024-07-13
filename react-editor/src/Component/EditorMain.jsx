@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import ImageURL from "./ImageURL";
 import LinkInsertion from "./LinkInsertion";
 import { MdOutlineFormatIndentDecrease, MdOutlineFormatIndentIncrease, MdOutlineFormatListBulleted, MdOutlineFormatListNumbered } from "react-icons/md";
@@ -15,9 +15,19 @@ const EditorMain = () => {
     const savedSelection = useRef(null);
     const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
     const [displayLinkModal, setDisplayLinkModal] = useState(false);
+    const [displayVariablePopup, setDisplayVariablePopup] = useState(false);
+    const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
     const contentEditableRef = useRef(null);
     const imageButtonRef = useRef(null);
     const linkButtonRef = useRef(null);
+
+    const variables = ["firstName", "lastName", "signature"];
+    console.log(htmlContent)
+    useEffect(() => {
+        if (displayVariablePopup) {
+            contentEditableRef.current.focus();
+        }
+    }, [displayVariablePopup]);
 
     const saveSelection = () => {
         const sel = window.getSelection();
@@ -41,7 +51,6 @@ const EditorMain = () => {
         contentEditableRef.current.focus();
         setHtmlContent(contentEditableRef.current.innerHTML);
     };
-
 
     const toggleColorPicker = () => {
         saveSelection();
@@ -68,7 +77,6 @@ const EditorMain = () => {
         setDisplayLinkModal(true);
     };
 
-
     const applyIndent = () => {
         applyStyle("indent");
     };
@@ -76,7 +84,6 @@ const EditorMain = () => {
     const applyOutdent = () => {
         applyStyle("outdent");
     };
-
 
     const insertList = (type) => {
         restoreSelection();
@@ -108,9 +115,28 @@ const EditorMain = () => {
         setHtmlContent(contentEditableRef.current.innerHTML);
     };
 
+    const handleKeyUp = (e) => {
+        saveSelection();
+        setHtmlContent(contentEditableRef.current.innerHTML);
+        if (e.key === "{") {
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0).getBoundingClientRect();
+            setPopupPosition({ top: range.bottom + window.scrollY, left: range.left + window.scrollX });
+            setDisplayVariablePopup(true);
+        }
+    };
 
+    const handleVariableClick = (variable) => {
+        insertVariable(variable);
+    };
 
-
+    const insertVariable = (variable) => {
+        restoreSelection();
+        document.execCommand("insertText", false, `{${variable}}}`);
+        contentEditableRef.current.focus();
+        setHtmlContent(contentEditableRef.current.innerHTML);
+        setDisplayVariablePopup(false);
+    };
 
     return (
         <div className="editor-wrapper text-start px-8">
@@ -172,14 +198,25 @@ const EditorMain = () => {
                 />
             )}
 
+            {displayVariablePopup && (
+                <div className="w-[200px] shadow-md font-poppins text-slate-600 rounded-md border border-slate-300 " style={{ position: 'absolute', top: popupPosition.top, left: popupPosition.left, zIndex: 1000 }}>
+                    {variables.map(variable => (
+                        <div className="py-2 px-4 hover:bg-blue-100 w-full flex" key={variable} onClick={() => handleVariableClick(variable)} style={{ cursor: 'pointer' }}>
+                            {variable}
+                        </div>
+                    ))}
+                </div>
+            )}
+
+
             <div
                 ref={contentEditableRef}
                 className="output max-w-full min-w-xl !px-4 focus:outline-none rounded-md border-2 border-slate-400 text-slate-600"
                 contentEditable
-                dangerouslySetInnerHTML={{ __html: htmlContent }}
                 style={{ minHeight: '700px', border: '1px solid #ccc', padding: '10px' }}
                 onMouseUp={saveSelection}
-                onKeyUp={saveSelection}
+                onKeyUp={handleKeyUp}
+                onInput={() => setHtmlContent(contentEditableRef.current.innerHTML)}
             />
         </div>
     );
