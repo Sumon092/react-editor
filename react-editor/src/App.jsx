@@ -1,6 +1,7 @@
 
 import './App.css'
-import EditorMain from './Component/EditorMain'
+import EditorMain from './Editor/EditorMain'
+
 
 function App() {
 
